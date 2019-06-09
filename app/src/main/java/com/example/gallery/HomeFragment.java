@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -40,8 +41,10 @@ public class HomeFragment extends Fragment {
     private RecyclerView homeRecyclerView;
     private ImageAdapter adapter;
     private ProgressDialog dialog;
+    boolean networkConnected;
     Flickr mService;
     CompositeDisposable compositeDisposable;
+    Snackbar snackbar;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -50,7 +53,33 @@ public class HomeFragment extends Fragment {
         mService=retrofit.create(Flickr.class);
     }
 
+    public BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+            String reason = intent.getStringExtra(ConnectivityManager.EXTRA_REASON);
+            boolean isFailover = intent.getBooleanExtra(ConnectivityManager.EXTRA_IS_FAILOVER, false);
 
+            NetworkInfo currentNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+            NetworkInfo otherNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO);
+
+            networkConnected=currentNetworkInfo.isConnected();
+
+            if (currentNetworkInfo.isConnected()) {
+                //Toast.makeText(getContext(), "Connected", Toast.LENGTH_LONG).show();
+            } else {
+                dialog.dismiss();
+                //Toast.makeText(getContext(), "Not Connected", Toast.LENGTH_LONG).show();
+                snackbar=Snackbar.make(getView(),"Internet not there",Snackbar.LENGTH_INDEFINITE);
+                snackbar.setAction("Retry", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                            getPhotosFromFlickr();
+                    }
+                });
+                snackbar.show();
+            }
+        }
+    };
 
 
     @Override
@@ -70,7 +99,8 @@ public class HomeFragment extends Fragment {
         dialog.setCanceledOnTouchOutside(false);
         homeRecyclerView.addItemDecoration(new SpacesItemDecoration(16));
         getPhotosFromFlickr();
-
+        getActivity().registerReceiver(this.mConnReceiver,
+                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
 
         return view;
@@ -94,7 +124,9 @@ public class HomeFragment extends Fragment {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
-                        Toast.makeText(getActivity(),throwable.getMessage(),Toast.LENGTH_LONG).show();
+                        dialog.dismiss();
+                        snackbar.show();
+                        //Toast.makeText(getActivity(),throwable.getMessage(),Toast.LENGTH_LONG).show();
                     }
                 })
 

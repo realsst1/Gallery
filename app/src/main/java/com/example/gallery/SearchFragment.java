@@ -2,11 +2,19 @@ package com.example.gallery;
 
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +45,7 @@ public class SearchFragment extends Fragment {
     private MaterialSearchBar searchBar;
     Flickr mService;
     CompositeDisposable compositeDisposable;
+    Snackbar snackbar;
 
     public SearchFragment() {
         // Required empty public constructor
@@ -45,11 +54,45 @@ public class SearchFragment extends Fragment {
         mService=retrofit.create(Flickr.class);
     }
 
+    public BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+            String reason = intent.getStringExtra(ConnectivityManager.EXTRA_REASON);
+            boolean isFailover = intent.getBooleanExtra(ConnectivityManager.EXTRA_IS_FAILOVER, false);
+
+            NetworkInfo currentNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
+            NetworkInfo otherNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO);
+
+            // networkConnected=currentNetworkInfo.isConnected();
+
+            if (currentNetworkInfo.isConnected()) {
+                //Toast.makeText(getContext(), "Connected", Toast.LENGTH_LONG).show();
+            } else {
+                dialog.dismiss();
+                //Toast.makeText(getContext(), "Not Connected", Toast.LENGTH_LONG).show();
+                snackbar=Snackbar.make(getView(),"Internet not there",Snackbar.LENGTH_INDEFINITE);
+                snackbar.setAction("Retry", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(!TextUtils.isEmpty(searchBar.getText()))
+                             getSearchResultsFromFlickr(searchBar.getText());
+                    }
+                });
+                snackbar.show();
+            }
+        }
+    };
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view= inflater.inflate(R.layout.fragment_search, container, false);
+
+
+        getActivity().registerReceiver(this.mConnReceiver,
+                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
         searchRecyclerView=(RecyclerView)view.findViewById(R.id.searchRecyclerView);
 
         searchRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2));
@@ -115,7 +158,9 @@ public class SearchFragment extends Fragment {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
-                        Toast.makeText(getActivity(),throwable.getMessage(),Toast.LENGTH_LONG).show();
+                        dialog.dismiss();
+
+                        //Toast.makeText(getActivity(),throwable.getMessage(),Toast.LENGTH_LONG).show();
 
                     }
                 })
