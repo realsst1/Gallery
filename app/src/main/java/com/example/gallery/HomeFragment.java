@@ -58,6 +58,7 @@ public class HomeFragment extends Fragment {
         dialog.setTitle("Loading Images");
         dialog.setMessage("Please wait while we load the images...");
         dialog.setCanceledOnTouchOutside(false);
+        homeRecyclerView.addItemDecoration(new SpacesItemDecoration(16));
         getPhotosFromFlickr();
         return view;
     }
@@ -93,7 +94,7 @@ public class HomeFragment extends Fragment {
         String url="https://farm"+photoResult.getPhotos().photo.get(0).getFarm()+".staticflickr.com/"+
                 photoResult.photos.photo.get(0).getServer()+"/"+
                 photoResult.photos.photo.get(0).getId()+"_"+photoResult.photos.photo.get(0).getSecret()+"_m.jpg";
-        System.out.println(url);
+        //System.out.println(url);
         adapter=new ImageAdapter(photoResult);
         homeRecyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();

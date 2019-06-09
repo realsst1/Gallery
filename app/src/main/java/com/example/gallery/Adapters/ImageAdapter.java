@@ -48,7 +48,6 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
             super(itemView);
             view=itemView;
         }
-
         public void setImage(String uri){
             ImageView imageView=(ImageView)view.findViewById(R.id.imageViewSingle);
             Glide.with(context).load(uri).into(imageView);
