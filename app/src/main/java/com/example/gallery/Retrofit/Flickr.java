@@ -18,4 +18,12 @@ public interface Flickr {
                                             @Query("extras") String EXTRA_SMALL_URL,
                                             @Query("format") String format,
                                             @Query("nojsoncallback") String nojsoncallback);
+
+    @GET("rest/")
+    Observable<PhotoResult> getSearchResult(@Query("method") String method,
+                                            @Query("api_key") String API_KEY,
+                                            @Query("extras") String EXTRA_SMALL_URL,
+                                            @Query("format") String format,
+                                            @Query("nojsoncallback") String nojsoncallback,
+                                            @Query("text") String text);
 }

@@ -2,6 +2,12 @@ package com.example.gallery;
 
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -45,11 +51,15 @@ public class HomeFragment extends Fragment {
     }
 
 
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view=inflater.inflate(R.layout.fragment_home, container, false);
+
+
         homeRecyclerView=(RecyclerView)view.findViewById(R.id.homeRecyclerView);
 
         homeRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2));
@@ -60,6 +70,9 @@ public class HomeFragment extends Fragment {
         dialog.setCanceledOnTouchOutside(false);
         homeRecyclerView.addItemDecoration(new SpacesItemDecoration(16));
         getPhotosFromFlickr();
+
+
+
         return view;
     }
 
@@ -99,6 +112,7 @@ public class HomeFragment extends Fragment {
         homeRecyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
     }
+
 
 
 }
