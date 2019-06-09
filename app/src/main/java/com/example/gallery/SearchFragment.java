@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -40,6 +41,14 @@ import retrofit2.Retrofit;
  * A simple {@link Fragment} subclass.
  */
 public class SearchFragment extends Fragment {
+
+    static SearchFragment instance;
+
+    public static SearchFragment getInstance() {
+        if(instance==null)
+            instance=new SearchFragment();
+        return instance;
+    }
 
     View view=null;
 
@@ -97,6 +106,9 @@ public class SearchFragment extends Fragment {
         searchRecyclerView.addItemDecoration(new SpacesItemDecoration(16));
 
         //getSearchResultsFromFlickr();
+
+
+        setRetainInstance(true);
         return view;
     }
 
@@ -112,7 +124,12 @@ public class SearchFragment extends Fragment {
 
             @Override
             public void onSearchConfirmed(CharSequence text) {
-                getSearchResultsFromFlickr(text.toString());
+                if(networkConnected) {
+                    if (TextUtils.isEmpty(text.toString()) == false)
+                        getSearchResultsFromFlickr(text.toString());
+                }
+                else
+                    makeSnackBar();
             }
 
             @Override
@@ -128,7 +145,12 @@ public class SearchFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                getSearchResultsFromFlickr(s.toString());
+                if(networkConnected) {
+                    if (TextUtils.isEmpty(s.toString()) == false)
+                        getSearchResultsFromFlickr(s.toString());
+                }
+                else
+                    makeSnackBar();
             }
 
             @Override
@@ -180,12 +202,30 @@ public class SearchFragment extends Fragment {
         snackbar.setAction("Retry", new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(networkConnected==true && TextUtils.isEmpty(searchBar.getText())==false)
-                    getSearchResultsFromFlickr(searchBar.getText());
+                if(networkConnected==true) {
+                    if (TextUtils.isEmpty(searchBar.getText()) == false)
+                        getSearchResultsFromFlickr(searchBar.getText());
+                }
                 else
                     makeSnackBar();
             }
         });
         snackbar.show();
     }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getActivity().unregisterReceiver(this.mConnReceiver);
+    }
+
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+    }
+
+
 }

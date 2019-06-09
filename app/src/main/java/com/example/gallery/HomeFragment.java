@@ -40,6 +40,14 @@ import retrofit2.Retrofit;
  */
 public class HomeFragment extends Fragment {
 
+    static HomeFragment instance;
+
+    public static HomeFragment getInstance() {
+        if(instance==null)
+            instance=new HomeFragment();
+        return instance;
+    }
+
     private RecyclerView homeRecyclerView;
     private ImageAdapter adapter;
     private ProgressDialog dialog;
@@ -167,5 +175,13 @@ public class HomeFragment extends Fragment {
             }
         });
         snackbar.show();
+    }
+
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getActivity().unregisterReceiver(this.mConnReceiver);
     }
 }
