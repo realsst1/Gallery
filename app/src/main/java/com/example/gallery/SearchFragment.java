@@ -41,6 +41,8 @@ import retrofit2.Retrofit;
  */
 public class SearchFragment extends Fragment {
 
+    View view=null;
+
     private RecyclerView searchRecyclerView;
     private ImageAdapter adapter;
     private ProgressDialog dialog;
@@ -71,17 +73,7 @@ public class SearchFragment extends Fragment {
             if (currentNetworkInfo.isConnected()) {
                 //Toast.makeText(getContext(), "Connected", Toast.LENGTH_LONG).show();
             } else {
-                dialog.dismiss();
-                //Toast.makeText(getContext(), "Not Connected", Toast.LENGTH_LONG).show();
-                snackbar=Snackbar.make(getView(),"Internet not there",Snackbar.LENGTH_INDEFINITE);
-                snackbar.setAction("Retry", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if(!TextUtils.isEmpty(searchBar.getText()))
-                             getSearchResultsFromFlickr(searchBar.getText());
-                    }
-                });
-                snackbar.show();
+                makeSnackBar();
             }
         }
     };
@@ -90,9 +82,7 @@ public class SearchFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view= inflater.inflate(R.layout.fragment_search, container, false);
-
-
+        view= inflater.inflate(R.layout.fragment_search, container, false);
 
         searchRecyclerView=(RecyclerView)view.findViewById(R.id.searchRecyclerView);
 
@@ -184,4 +174,18 @@ public class SearchFragment extends Fragment {
         searchRecyclerView.setAdapter(adapter);
     }
 
+
+    public void makeSnackBar(){
+        snackbar=Snackbar.make(view,"Internet not there",Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction("Retry", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(networkConnected==true && TextUtils.isEmpty(searchBar.getText())==false)
+                    getSearchResultsFromFlickr(searchBar.getText());
+                else
+                    makeSnackBar();
+            }
+        });
+        snackbar.show();
+    }
 }

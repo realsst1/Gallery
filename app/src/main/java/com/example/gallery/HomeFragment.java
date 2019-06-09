@@ -43,11 +43,11 @@ public class HomeFragment extends Fragment {
     private RecyclerView homeRecyclerView;
     private ImageAdapter adapter;
     private ProgressDialog dialog;
-    boolean networkConnected;
+    boolean networkConnected=true;
     Flickr mService;
     CompositeDisposable compositeDisposable;
     Snackbar snackbar;
-    View view1;
+    View view;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -72,18 +72,8 @@ public class HomeFragment extends Fragment {
             } else {
                 dialog.dismiss();
                 //Toast.makeText(getContext(), "Not Connected", Toast.LENGTH_LONG).show();
+                makeSnackBar();
 
-                snackbar=Snackbar.make(getView(),"Internet not there",Snackbar.LENGTH_INDEFINITE);
-                snackbar.setAction("Retry", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                            if(networkConnected==false)
-                                getPhotosFromFlickr();
-                            else
-                                snackbar.show();
-                    }
-                });
-                snackbar.show();
             }
         }
     };
@@ -93,7 +83,7 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view=inflater.inflate(R.layout.fragment_home, container, false);
+        view=inflater.inflate(R.layout.fragment_home, container, false);
 
 
         homeRecyclerView=(RecyclerView)view.findViewById(R.id.homeRecyclerView);
@@ -107,7 +97,7 @@ public class HomeFragment extends Fragment {
         homeRecyclerView.addItemDecoration(new SpacesItemDecoration(16));
 
 
-        view1=view;
+
         return view;
     }
 
@@ -122,19 +112,8 @@ public class HomeFragment extends Fragment {
         if(networkConnected==true)
             getPhotosFromFlickr();
         else{
-            snackbar=Snackbar.make(getView(),"Internet not there",Snackbar.LENGTH_INDEFINITE);
-            snackbar.setAction("Retry", new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(networkConnected==false)
-                        getPhotosFromFlickr();
-                    else
-                        snackbar.show();
-                }
-            });
-            snackbar.show();
+            makeSnackBar();
         }
-
     }
 
     private void getPhotosFromFlickr() {
@@ -176,6 +155,17 @@ public class HomeFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
-
-
+    public void makeSnackBar(){
+        snackbar=Snackbar.make(view,"Internet not there",Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction("Retry", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(networkConnected==true)
+                    getPhotosFromFlickr();
+               else
+                   makeSnackBar();
+            }
+        });
+        snackbar.show();
+    }
 }
