@@ -9,6 +9,8 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -43,6 +45,7 @@ public class SearchFragment extends Fragment {
     private ImageAdapter adapter;
     private ProgressDialog dialog;
     private MaterialSearchBar searchBar;
+    boolean networkConnected;
     Flickr mService;
     CompositeDisposable compositeDisposable;
     Snackbar snackbar;
@@ -63,7 +66,7 @@ public class SearchFragment extends Fragment {
             NetworkInfo currentNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
             NetworkInfo otherNetworkInfo = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO);
 
-            // networkConnected=currentNetworkInfo.isConnected();
+            networkConnected=currentNetworkInfo.isConnected();
 
             if (currentNetworkInfo.isConnected()) {
                 //Toast.makeText(getContext(), "Connected", Toast.LENGTH_LONG).show();
@@ -90,8 +93,6 @@ public class SearchFragment extends Fragment {
         View view= inflater.inflate(R.layout.fragment_search, container, false);
 
 
-        getActivity().registerReceiver(this.mConnReceiver,
-                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
         searchRecyclerView=(RecyclerView)view.findViewById(R.id.searchRecyclerView);
 
@@ -104,6 +105,15 @@ public class SearchFragment extends Fragment {
         dialog.setMessage("Please wait while we search the images...");
         dialog.setCanceledOnTouchOutside(false);
         searchRecyclerView.addItemDecoration(new SpacesItemDecoration(16));
+
+        //getSearchResultsFromFlickr();
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
             @Override
             public void onSearchStateChanged(boolean enabled) {
@@ -136,8 +146,10 @@ public class SearchFragment extends Fragment {
 
             }
         });
-        //getSearchResultsFromFlickr();
-        return view;
+
+        getActivity().registerReceiver(this.mConnReceiver,
+                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
     }
 
     private void getSearchResultsFromFlickr(String text) {

@@ -9,6 +9,8 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -45,6 +47,7 @@ public class HomeFragment extends Fragment {
     Flickr mService;
     CompositeDisposable compositeDisposable;
     Snackbar snackbar;
+    View view1;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -69,11 +72,15 @@ public class HomeFragment extends Fragment {
             } else {
                 dialog.dismiss();
                 //Toast.makeText(getContext(), "Not Connected", Toast.LENGTH_LONG).show();
+
                 snackbar=Snackbar.make(getView(),"Internet not there",Snackbar.LENGTH_INDEFINITE);
                 snackbar.setAction("Retry", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                            getPhotosFromFlickr();
+                            if(networkConnected==false)
+                                getPhotosFromFlickr();
+                            else
+                                snackbar.show();
                     }
                 });
                 snackbar.show();
@@ -98,12 +105,36 @@ public class HomeFragment extends Fragment {
         dialog.setMessage("Please wait while we load the images...");
         dialog.setCanceledOnTouchOutside(false);
         homeRecyclerView.addItemDecoration(new SpacesItemDecoration(16));
-        getPhotosFromFlickr();
+
+
+        view1=view;
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         getActivity().registerReceiver(this.mConnReceiver,
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
 
-        return view;
+        if(networkConnected==true)
+            getPhotosFromFlickr();
+        else{
+            snackbar=Snackbar.make(getView(),"Internet not there",Snackbar.LENGTH_INDEFINITE);
+            snackbar.setAction("Retry", new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(networkConnected==false)
+                        getPhotosFromFlickr();
+                    else
+                        snackbar.show();
+                }
+            });
+            snackbar.show();
+        }
+
     }
 
     private void getPhotosFromFlickr() {
