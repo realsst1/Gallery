@@ -18,6 +18,9 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     PhotoResult photoResult;
     Context context;
 
+    public ImageAdapter(PhotoResult photoResult) {
+        this.photoResult = photoResult;
+    }
 
     @NonNull
     @Override
@@ -29,6 +32,8 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull ImageAdapter.ViewHolder viewHolder, int i) {
+
+        viewHolder.setImage(photoResult.getPhotos().getPhoto().get(i).getUrl_s());
 
     }
 

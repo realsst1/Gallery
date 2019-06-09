@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
     private Toolbar mainToolbar;
+    private HomeFragment homeFragment;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -22,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_home:
                     FragmentManager fragmentManager=getSupportFragmentManager();
                     FragmentTransaction fragmentTransaction=fragmentManager.beginTransaction();
-                    fragmentTransaction.replace(R.id.frame,new HomeFragment());
+                    fragmentTransaction.replace(R.id.frame,homeFragment);
                     fragmentTransaction.commit();
                     return true;
                 case R.id.navigation_dashboard:
@@ -42,7 +43,11 @@ public class MainActivity extends AppCompatActivity {
         mainToolbar=(Toolbar)findViewById(R.id.homeToolbar);
         setSupportActionBar(mainToolbar);
         getSupportActionBar().setTitle("Gallery");
-
+        homeFragment=new HomeFragment();
+        FragmentManager fragmentManager=getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction=fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.frame,homeFragment);
+        fragmentTransaction.commit();
     }
 
 }

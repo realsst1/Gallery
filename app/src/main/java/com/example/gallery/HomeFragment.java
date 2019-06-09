@@ -1,6 +1,7 @@
 package com.example.gallery;
 
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.gallery.Adapters.ImageAdapter;
@@ -31,6 +33,7 @@ public class HomeFragment extends Fragment {
 
     private RecyclerView homeRecyclerView;
     private ImageAdapter adapter;
+    private ProgressDialog dialog;
     Flickr mService;
     CompositeDisposable compositeDisposable;
 
@@ -51,11 +54,16 @@ public class HomeFragment extends Fragment {
 
         homeRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2));
 
+        dialog=new ProgressDialog(getActivity());
+        dialog.setTitle("Loading Images");
+        dialog.setMessage("Please wait while we load the images...");
+        dialog.setCanceledOnTouchOutside(false);
         getPhotosFromFlickr();
         return view;
     }
 
     private void getPhotosFromFlickr() {
+        dialog.show();
         compositeDisposable.add(mService.getRecentResult("flickr.photos.getRecent",
                 Common.API_KEY,
                 "url_s",
@@ -75,15 +83,20 @@ public class HomeFragment extends Fragment {
                         Toast.makeText(getActivity(),throwable.getMessage(),Toast.LENGTH_LONG).show();
                     }
                 })
+
         );
     }
 
     private void setPhotosInView(PhotoResult photoResult) {
 
-
-
-        adapter=new ImageAdapter();
+        dialog.dismiss();
+        String url="https://farm"+photoResult.getPhotos().photo.get(0).getFarm()+".staticflickr.com/"+
+                photoResult.photos.photo.get(0).getServer()+"/"+
+                photoResult.photos.photo.get(0).getId()+"_"+photoResult.photos.photo.get(0).getSecret()+"_m.jpg";
+        System.out.println(url);
+        adapter=new ImageAdapter(photoResult);
         homeRecyclerView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
     }
 
 

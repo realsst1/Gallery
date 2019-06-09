@@ -11,7 +11,7 @@ public class RetrofitClient {
     public static Retrofit getInstance() {
         if(instance==null)
             instance=new Retrofit.Builder()
-                        .baseUrl("https://api.flickr.com/services")
+                        .baseUrl("https://api.flickr.com/services/")
                         .addConverterFactory(GsonConverterFactory.create())
                         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                         .build();
