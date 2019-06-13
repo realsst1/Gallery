@@ -17,6 +17,8 @@ public interface Flickr {
                                             @Query("api_key") String API_KEY,
                                             @Query("extras") String EXTRA_SMALL_URL,
                                             @Query("format") String format,
+                                            @Query("page") int page,
+                                            @Query("per_page") int perPage,
                                             @Query("nojsoncallback") String nojsoncallback);
 
     @GET("rest/")

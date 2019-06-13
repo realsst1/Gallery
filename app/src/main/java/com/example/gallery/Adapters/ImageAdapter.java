@@ -9,17 +9,22 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.example.gallery.Models.Photo;
 import com.example.gallery.Models.PhotoResult;
 import com.example.gallery.R;
+
+import java.util.List;
 
 
 public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
 
     PhotoResult photoResult;
+    List<Photo> photoList;
     Context context;
 
     public ImageAdapter(PhotoResult photoResult) {
         this.photoResult = photoResult;
+        photoList=photoResult.getPhotos().photo;
     }
 
     @NonNull
@@ -35,6 +40,10 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
 
         viewHolder.setImage(photoResult.getPhotos().getPhoto().get(i).getUrl_s());
 
+    }
+
+    public void add(List<Photo> list){
+        photoList.addAll(list);
     }
 
     @Override

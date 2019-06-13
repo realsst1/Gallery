@@ -16,6 +16,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,10 +49,19 @@ public class HomeFragment extends Fragment {
         return instance;
     }
 
+    private int previousTotal = 0;
+    private boolean loading = true;
+    private int visibleThreshold = 5;
+    int firstVisibleItem, visibleItemCount, totalItemCount;
+
     private RecyclerView homeRecyclerView;
     private ImageAdapter adapter;
     private ProgressDialog dialog;
+    private static int currentPage=1;
+    private boolean first=true;
+    int pastVisiblesItems;
     boolean networkConnected=true;
+    private GridLayoutManager gridLayoutManager;
     Flickr mService;
     CompositeDisposable compositeDisposable;
     Snackbar snackbar;
@@ -96,7 +106,8 @@ public class HomeFragment extends Fragment {
 
         homeRecyclerView=(RecyclerView)view.findViewById(R.id.homeRecyclerView);
 
-        homeRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2));
+        gridLayoutManager=new GridLayoutManager(getActivity(),2);
+        homeRecyclerView.setLayoutManager(gridLayoutManager);
 
         dialog=new ProgressDialog(getActivity());
         dialog.setTitle("Loading Images");
@@ -106,9 +117,46 @@ public class HomeFragment extends Fragment {
 
 
 
+        homeRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                if(dy > 0) //check for scroll down
+                {
+                    visibleItemCount = homeRecyclerView.getChildCount();
+                    totalItemCount = gridLayoutManager.getItemCount();
+                    firstVisibleItem = gridLayoutManager.findFirstVisibleItemPosition();
+
+
+                    if (loading) {
+                        if (totalItemCount > previousTotal) {
+                            loading = false;
+                            previousTotal = totalItemCount;
+                        }
+                    }
+                    if (!loading && (totalItemCount - visibleItemCount)
+                            <= (firstVisibleItem + visibleThreshold)) {
+                        // End has been reached
+
+                        Log.i("Yaeye!", "end called");
+
+                        // Do something
+                        currentPage++;
+                        getPhotosFromFlickr();
+
+                        loading = true;
+                    }
+                }
+            }
+        });
         return view;
     }
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -130,6 +178,8 @@ public class HomeFragment extends Fragment {
                 Common.API_KEY,
                 "url_s",
                 "json",
+                currentPage,
+                20,
                 "1")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -157,9 +207,16 @@ public class HomeFragment extends Fragment {
         String url="https://farm"+photoResult.getPhotos().photo.get(0).getFarm()+".staticflickr.com/"+
                 photoResult.photos.photo.get(0).getServer()+"/"+
                 photoResult.photos.photo.get(0).getId()+"_"+photoResult.photos.photo.get(0).getSecret()+"_m.jpg";
-        //System.out.println(url);
-        adapter=new ImageAdapter(photoResult);
-        homeRecyclerView.setAdapter(adapter);
+        System.out.println(photoResult.getPhotos().getTotal());
+        if(first) {
+            adapter = new ImageAdapter(photoResult);
+            homeRecyclerView.setAdapter(adapter);
+            first=false;
+        }
+        else{
+            adapter.add(photoResult.getPhotos().photo);
+        }
+
         adapter.notifyDataSetChanged();
     }
 
