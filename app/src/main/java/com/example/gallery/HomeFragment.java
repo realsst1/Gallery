@@ -127,7 +127,7 @@ public class HomeFragment extends Fragment {
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                if(dy > 0) //check for scroll down
+                if(dy > 0)
                 {
                     visibleItemCount = homeRecyclerView.getChildCount();
                     totalItemCount = gridLayoutManager.getItemCount();
@@ -142,12 +142,10 @@ public class HomeFragment extends Fragment {
                     }
                     if (!loading && (totalItemCount - visibleItemCount)
                             <= (firstVisibleItem + visibleThreshold)) {
-                        // End has been reached
 
-                        Log.i("Yaeye!", "end called");
 
-                        // Do something
                         currentPage++;
+                        System.out.println(currentPage+ " loaded");
                         getPhotosFromFlickr();
 
                         loading = true;
